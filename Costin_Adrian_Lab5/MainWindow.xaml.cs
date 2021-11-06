@@ -66,6 +66,29 @@ namespace Costin_Adrian_Lab5
             cmbInventory.SelectedValuePath = "CarId";
         }
 
+        private void SetValidationBinding()
+        {
+            Binding firstNameValidationBinding = new Binding();
+            firstNameValidationBinding.Source = customerViewSource;
+            firstNameValidationBinding.Path = new PropertyPath("FirstName");
+            firstNameValidationBinding.NotifyOnValidationError = true;
+            firstNameValidationBinding.Mode = BindingMode.TwoWay;
+            firstNameValidationBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            //string required
+            firstNameValidationBinding.ValidationRules.Add(new StringNotEmpty());
+            firstNameTextBox.SetBinding(TextBox.TextProperty, firstNameValidationBinding);
+            
+            Binding lastNameValidationBinding = new Binding();
+            lastNameValidationBinding.Source = customerViewSource;
+            lastNameValidationBinding.Path = new PropertyPath("LastName");
+            lastNameValidationBinding.NotifyOnValidationError = true;
+            lastNameValidationBinding.Mode = BindingMode.TwoWay;
+            lastNameValidationBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            //string min length validator
+            lastNameValidationBinding.ValidationRules.Add(new StringMinLengthValidator());
+            lastNameTextBox.SetBinding(TextBox.TextProperty, lastNameValidationBinding); //setare binding nou
+        }
+
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             Customer customer = null;
@@ -83,6 +106,9 @@ namespace Costin_Adrian_Lab5
                     //adaugam entitatea nou creata in context
                     ctx.Customers.Add(customer);
                     customerViewSource.View.Refresh();
+
+                    SetValidationBinding();
+
                     //salvam modificarile
                     ctx.SaveChanges();
                 }
@@ -100,6 +126,9 @@ namespace Costin_Adrian_Lab5
                     customer = (Customer)customerDataGrid.SelectedItem;
                     customer.FirstName = firstNameTextBox.Text.Trim();
                     customer.LastName = lastNameTextBox.Text.Trim();
+
+                    SetValidationBinding();
+
                     //salvam modificarile
                     ctx.SaveChanges();
                 }
@@ -303,6 +332,16 @@ namespace Costin_Adrian_Lab5
                                  inv.Color
                              };
             customerOrdersViewSource.Source = queryOrder.ToList();
+        }
+
+        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            action = ActionState.Edit;
+
+            BindingOperations.ClearBinding(firstNameTextBox, TextBox.TextProperty);
+            BindingOperations.ClearBinding(lastNameTextBox, TextBox.TextProperty);
+
+            SetValidationBinding();
         }
     }
 }
